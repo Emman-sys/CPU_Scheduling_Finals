@@ -196,6 +196,71 @@
                 </div>
             </div>
         </div>
+
+        <!-- Card 3: Algorithm Explanation -->
+        <div class="bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-6 mb-6">
+            <h2 class="text-2xl font-bold mb-4">Round Robin (RR) Algorithm</h2>
+            <p class="text-sm text-gray-700 mb-3">Round Robin - each process gets a small time quantum. If not finished, the process is preempted and moved to the back of the queue.</p>
+            <pre class="whitespace-pre-wrap bg-gray-100 p-4 rounded text-sm overflow-auto"><code>/* Round Robin pseudocode */
+function calculateRoundRobin(processes, quantum) {
+  let proc = processes.map(p => ({...p, remainingTime: p.bt}));
+  proc.sort((a,b) => a.at - b.at);
+  
+  let queue = [];
+  let currentTime = 0;
+  let completed = 0;
+  let results = [];
+  let gantt = [];
+  let i = 0;
+  
+  // enqueue all processes that have arrived at time 0
+  while (i < proc.length && proc[i].at <= currentTime) {
+    queue.push(proc[i]);
+    i++;
+  }
+  
+  while (completed < proc.length) {
+    if (queue.length === 0) {
+      // idle - jump to next arrival
+      currentTime = proc[i].at;
+      queue.push(proc[i]);
+      i++;
+    }
+    
+    const process = queue.shift();
+    const start = currentTime;
+    const executeTime = Math.min(quantum, process.remainingTime);
+    process.remainingTime -= executeTime;
+    currentTime += executeTime;
+    
+    gantt.push({ pid: process.pid, start, end: currentTime });
+    
+    // enqueue new arrivals that came during execution
+    while (i < proc.length && proc[i].at <= currentTime) {
+      queue.push(proc[i]);
+      i++;
+    }
+    
+    // if process finished
+    if (process.remainingTime === 0) {
+      completed++;
+      results.push({
+        pid: process.pid,
+        at: process.at,
+        bt: process.bt,
+        ct: currentTime,
+        tat: currentTime - process.at,
+        wt: currentTime - process.at - process.bt
+      });
+    } else {
+      // re-enqueue for another quantum
+      queue.push(process);
+    }
+  }
+  
+  return { results, gantt };
+}</code></pre>
+        </div>
     </div>
     <script>
         let processCount = 3;

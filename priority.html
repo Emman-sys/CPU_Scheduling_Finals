@@ -203,6 +203,46 @@
                 </div>
             </div>
         </div>
+
+        <!-- Card 3: Algorithm Explanation -->
+        <div class="bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-6 mb-6">
+            <h2 class="text-2xl font-bold mb-4">Priority Scheduling Algorithm (Non-preemptive)</h2>
+            <p class="text-sm text-gray-700 mb-3">Priority Scheduling (non-preemptive) - select the available process with the highest priority (lowest priority number).</p>
+            <pre class="whitespace-pre-wrap bg-gray-100 p-4 rounded text-sm overflow-auto"><code>/* Priority (Non-preemptive) pseudocode */
+function calculatePriority(processes) {
+  let pending = processes.slice();
+  let currentTime = 0;
+  let completed = [];
+  let gantt = [];
+
+  while (pending.length > 0) {
+    // find available processes
+    let available = pending.filter(p => p.at <= currentTime);
+
+    if (available.length === 0) {
+      currentTime = Math.min(...pending.map(p => p.at));
+      continue;
+    }
+
+    // pick highest priority (lowest number)
+    available.sort((a,b) => a.priority - b.priority);
+    let p = available[0];
+
+    // execute to completion
+    const start = currentTime;
+    currentTime += p.bt;
+    p.ct = currentTime;
+    p.tat = p.ct - p.at;
+    p.wt = p.tat - p.bt;
+    gantt.push({ pid: p.pid, start, end: currentTime });
+
+    pending.splice(pending.indexOf(p), 1);
+    completed.push(p);
+  }
+
+  return { results: completed, gantt };
+}</code></pre>
+        </div>
     </div>
 
     <script>

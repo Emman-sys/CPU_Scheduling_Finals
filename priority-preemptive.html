@@ -197,6 +197,59 @@
                 </div>
             </div>
         </div>
+
+        <!-- Card 3: Algorithm Explanation -->
+        <div class="bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-6 mb-6">
+            <h2 class="text-2xl font-bold mb-4">Priority Scheduling Algorithm (Preemptive)</h2>
+            <p class="text-sm text-gray-700 mb-3">Priority Scheduling (preemptive) - at each time unit, select the available process with the highest priority (lowest priority number).</p>
+            <pre class="whitespace-pre-wrap bg-gray-100 p-4 rounded text-sm overflow-auto"><code>/* Priority (Preemptive) pseudocode */
+function calculatePriorityPreemptive(processes) {
+  let proc = processes.map(p => ({...p, remainingTime: p.bt}));
+  let currentTime = 0;
+  let completed = 0;
+  let results = [];
+  let gantt = [];
+
+  while (completed < proc.length) {
+    let available = proc.filter(p => p.at <= currentTime && p.remainingTime > 0);
+
+    if (available.length === 0) {
+      currentTime++;
+      continue;
+    }
+
+    // pick highest priority (lowest number)
+    available.sort((a,b) => a.priority - b.priority);
+    let p = available[0];
+
+    const start = currentTime;
+    p.remainingTime--;
+    currentTime++;
+
+    // merge consecutive Gantt blocks
+    if (gantt.length > 0 && gantt[gantt.length - 1].pid === p.pid) {
+      gantt[gantt.length - 1].end = currentTime;
+    } else {
+      gantt.push({ pid: p.pid, start, end: currentTime });
+    }
+
+    if (p.remainingTime === 0) {
+      completed++;
+      results.push({
+        pid: p.pid,
+        at: p.at,
+        bt: p.bt,
+        priority: p.priority,
+        ct: currentTime,
+        tat: currentTime - p.at,
+        wt: currentTime - p.at - p.bt
+      });
+    }
+  }
+
+  return { results, gantt };
+}</code></pre>
+        </div>
     </div>
     <script>
         let processCount = 3;
