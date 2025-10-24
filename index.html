@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPU Scheduling Calculator - Home</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts - Lora -->
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+    
+    <style>
+        @keyframes gradientBG {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        body {
+            font-family: 'Lora', serif;
+            background: linear-gradient(135deg, 
+                #5479ff 0%,
+                #22a9fd 25%,
+                #130e95 50%,
+                #85b2ff 75%,
+                #0c72b1 100%);
+            background-size: 400% 400%;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-y: auto;
+            overflow-x: hidden;
+            position: relative;
+            padding: 40px 20px;
+            animation: gradientBG 15s ease infinite;
+        }
+        
+        .compass-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 50px;
+        }
+        
+        .compass-wheel {
+            position: relative;
+            width: 100%;
+            padding-bottom: 100%;
+            border-radius: 50%;
+        }
+        
+        .compass-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+            border: 8px solid rgba(255, 255, 255, 0.5);
+        }
+        
+        .compass-center-content {
+            text-align: center;
+        }
+        
+        .algorithm-orbit {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            transition: transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        .algorithm-item {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 150px;
+            height: 150px;
+            margin-left: -75px;
+            margin-top: -75px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease, transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            cursor: pointer;
+            border: 4px solid white;
+            z-index: 5;
+        }
+        
+        .algorithm-item:hover {
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+            filter: brightness(1.1);
+        }
+        
+        .algorithm-item a {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            text-decoration: none;
+            color: inherit;
+            padding: 10px;
+        }
+        
+        .algorithm-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+            color: white;
+            margin-bottom: 8px;
+        }
+        
+        .algorithm-name {
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+        
+        .algorithm-desc {
+            font-size: 10px;
+            color: #666;
+            margin-top: 4px;
+        }
+        
+        /* Position each item using rotation - creating a perfect circle */
+        /* Each item is rotated around the center, then counter-rotated to stay upright */
+        /* Starting with FCFS at the top (270 degrees) */
+        .algorithm-item:nth-child(1) {
+            transform: rotate(270deg) translate(280px) rotate(-270deg);
+            --original-transform: rotate(270deg) translate(280px) rotate(-270deg);
+        }
+        
+        .algorithm-item:nth-child(2) {
+            transform: rotate(315deg) translate(280px) rotate(-315deg);
+            --original-transform: rotate(315deg) translate(280px) rotate(-315deg);
+        }
+        
+        .algorithm-item:nth-child(3) {
+            transform: rotate(0deg) translate(280px) rotate(0deg);
+            --original-transform: rotate(0deg) translate(280px) rotate(0deg);
+        }
+        
+        .algorithm-item:nth-child(4) {
+            transform: rotate(45deg) translate(280px) rotate(-45deg);
+            --original-transform: rotate(45deg) translate(280px) rotate(-45deg);
+        }
+        
+        .algorithm-item:nth-child(5) {
+            transform: rotate(90deg) translate(280px) rotate(-90deg);
+            --original-transform: rotate(90deg) translate(280px) rotate(-90deg);
+        }
+        
+        .algorithm-item:nth-child(6) {
+            transform: rotate(135deg) translate(280px) rotate(-135deg);
+            --original-transform: rotate(135deg) translate(280px) rotate(-135deg);
+        }
+        
+        .algorithm-item:nth-child(7) {
+            transform: rotate(180deg) translate(280px) rotate(-180deg);
+            --original-transform: rotate(180deg) translate(280px) rotate(-180deg);
+        }
+        
+        .algorithm-item:nth-child(8) {
+            transform: rotate(225deg) translate(280px) rotate(-225deg);
+            --original-transform: rotate(225deg) translate(280px) rotate(-225deg);
+        }
+        
+        /* Compass decoration lines */
+        .compass-line {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.3);
+            z-index: 1;
+            top: 50%;
+            left: 50%;
+        }
+        
+        .compass-line.line-0 {
+            width: 2px;
+            height: 100%;
+            transform: translate(-50%, -50%) rotate(0deg);
+        }
+        
+        .compass-line.line-45 {
+            width: 2px;
+            height: 100%;
+            transform: translate(-50%, -50%) rotate(45deg);
+        }
+        
+        .compass-line.line-90 {
+            width: 2px;
+            height: 100%;
+            transform: translate(-50%, -50%) rotate(90deg);
+        }
+        
+        .compass-line.line-135 {
+            width: 2px;
+            height: 100%;
+            transform: translate(-50%, -50%) rotate(135deg);
+        }
+        
+        @media (max-width: 768px) {
+            .compass-container {
+                padding: 30px;
+            }
+            
+            .compass-center {
+                width: 140px;
+                height: 140px;
+            }
+            
+            .algorithm-item {
+                width: 110px;
+                height: 110px;
+                margin-left: -55px;
+                margin-top: -55px;
+            }
+            
+            .algorithm-item:nth-child(1) { 
+                transform: rotate(270deg) translate(200px) rotate(-270deg); 
+                --original-transform: rotate(270deg) translate(200px) rotate(-270deg);
+            }
+            .algorithm-item:nth-child(2) { 
+                transform: rotate(315deg) translate(200px) rotate(-315deg); 
+                --original-transform: rotate(315deg) translate(200px) rotate(-315deg);
+            }
+            .algorithm-item:nth-child(3) { 
+                transform: rotate(0deg) translate(200px) rotate(0deg); 
+                --original-transform: rotate(0deg) translate(200px) rotate(0deg);
+            }
+            .algorithm-item:nth-child(4) { 
+                transform: rotate(45deg) translate(200px) rotate(-45deg); 
+                --original-transform: rotate(45deg) translate(200px) rotate(-45deg);
+            }
+            .algorithm-item:nth-child(5) { 
+                transform: rotate(90deg) translate(200px) rotate(-90deg); 
+                --original-transform: rotate(90deg) translate(200px) rotate(-90deg);
+            }
+            .algorithm-item:nth-child(6) { 
+                transform: rotate(135deg) translate(200px) rotate(-135deg); 
+                --original-transform: rotate(135deg) translate(200px) rotate(-135deg);
+            }
+            .algorithm-item:nth-child(7) { 
+                transform: rotate(180deg) translate(200px) rotate(-180deg); 
+                --original-transform: rotate(180deg) translate(200px) rotate(-180deg);
+            }
+            .algorithm-item:nth-child(8) { 
+                transform: rotate(225deg) translate(200px) rotate(-225deg); 
+                --original-transform: rotate(225deg) translate(200px) rotate(-225deg);
+            }
+            
+            .algorithm-number {
+                width: 32px;
+                height: 32px;
+                font-size: 15px;
+            }
+            
+            .algorithm-name {
+                font-size: 12px;
+            }
+            
+            .algorithm-desc {
+                font-size: 8px;
+            }
+            
+            .compass-center-content .text-3xl {
+                font-size: 1.5rem;
+            }
+            
+            .compass-center-content .text-sm {
+                font-size: 0.75rem;
+            }
+            
+            .compass-center-content .text-xs {
+                font-size: 0.65rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .compass-container {
+                padding: 20px;
+            }
+            
+            .algorithm-item:nth-child(1) { transform: rotate(270deg) translate(150px) rotate(-270deg); }
+            .algorithm-item:nth-child(2) { transform: rotate(315deg) translate(150px) rotate(-315deg); }
+            .algorithm-item:nth-child(3) { transform: rotate(0deg) translate(150px) rotate(0deg); }
+            .algorithm-item:nth-child(4) { transform: rotate(45deg) translate(150px) rotate(-45deg); }
+            .algorithm-item:nth-child(5) { transform: rotate(90deg) translate(150px) rotate(-90deg); }
+            .algorithm-item:nth-child(6) { transform: rotate(135deg) translate(150px) rotate(-135deg); }
+            .algorithm-item:nth-child(7) { transform: rotate(180deg) translate(150px) rotate(-180deg); }
+            .algorithm-item:nth-child(8) { transform: rotate(225deg) translate(150px) rotate(-225deg); }
+            
+            .algorithm-item {
+                width: 90px;
+                height: 90px;
+                margin-left: -45px;
+                margin-top: -45px;
+            }
+            
+            .compass-center {
+                width: 100px;
+                height: 100px;
+            }
+        }
+
+        /* Floating Elements Animation */
+        .floating-element {
+            position: fixed;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0;
+            font-family: 'Lora', serif;
+            font-weight: 900;
+            text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        @keyframes fall-animation {
+            0% {
+                transform: translateY(0) translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(110vh) translateX(var(--translate-x)) rotate(var(--rotation));
+                opacity: 0;
+            }
+        }
+
+        @keyframes rise-animation {
+            0% {
+                transform: translateY(0) translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-110vh) translateX(var(--translate-x)) rotate(var(--rotation));
+                opacity: 0;
+            }
+        }
+
+        @keyframes spin-rise-animation {
+            0% {
+                transform: translateY(0) translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-110vh) translateX(var(--translate-x)) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .falling {
+            top: -50px;
+            animation: fall-animation var(--float-duration) linear forwards;
+        }
+
+        .rising {
+            bottom: -50px;
+            animation: rise-animation var(--float-duration) linear forwards;
+        }
+
+        .spin-rising {
+            bottom: -50px;
+            animation: spin-rise-animation var(--float-duration) linear forwards;
+        }
+    </style>
+</head>
+<body class="text-gray-900">
+    <div class="max-w-6xl mx-auto p-4 md:p-8">
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-6xl font-bold text-white drop-shadow-lg mb-3">CPU Scheduling Calculator</h1>
+            <p class="text-white/90 text-xl">Select a scheduling algorithm from the compass</p>
+        </header>
+
+        <!-- Compass Wheel Selector -->
+        <div class="compass-container">
+            <div class="compass-wheel">
+                <!-- Compass decoration lines -->
+                <div class="compass-line line-0"></div>
+                <div class="compass-line line-45"></div>
+                <div class="compass-line line-90"></div>
+                <div class="compass-line line-135"></div>
+                
+                <!-- Algorithm orbit container -->
+                <div class="algorithm-orbit">
+                    <!-- Algorithm Items positioned around the circle -->
+                    <div class="algorithm-item">
+                        <a href="fcfs.html">
+                            <div class="algorithm-number" style="background: #3b82f6;">1</div>
+                            <div class="algorithm-name">FCFS</div>
+                            <div class="algorithm-desc">First-Come First-Served</div>
+                        </a>
+                    </div>
+
+                    <div class="algorithm-item">
+                        <a href="sjf.html">
+                            <div class="algorithm-number" style="background: #10b981;">2</div>
+                            <div class="algorithm-name">SJF</div>
+                            <div class="algorithm-desc">Shortest Job First</div>
+                        </a>
+                    </div>
+
+                    <div class="algorithm-item">
+                        <a href="srtf.html">
+                            <div class="algorithm-number" style="background: #f59e0b;">3</div>
+                            <div class="algorithm-name">SRTF</div>
+                            <div class="algorithm-desc">Shortest Remaining Time</div>
+                        </a>
+                    </div>
+
+                    <div class="algorithm-item">
+                        <a href="priority.html">
+                            <div class="algorithm-number" style="background: #ef4444;">4</div>
+                            <div class="algorithm-name">Priority</div>
+                            <div class="algorithm-desc">Non-Preemptive</div>
+                        </a>
+                    </div>
+
+                    <div class="algorithm-item">
+                        <a href="priority-preemptive.html">
+                            <div class="algorithm-number" style="background: #8b5cf6;">5</div>
+                            <div class="algorithm-name">Priority (P)</div>
+                            <div class="algorithm-desc">Preemptive</div>
+                        </a>
+                    </div>
+
+                    <div class="algorithm-item">
+                        <a href="hrrn.html">
+                            <div class="algorithm-number" style="background: #ec4899;">6</div>
+                            <div class="algorithm-name">HRRN</div>
+                            <div class="algorithm-desc">Highest Response Ratio</div>
+                        </a>
+                    </div>
+
+                    <div class="algorithm-item">
+                        <a href="round-robin.html">
+                            <div class="algorithm-number" style="background: #6366f1;">7</div>
+                            <div class="algorithm-name">Round Robin</div>
+                            <div class="algorithm-desc">Time Quantum</div>
+                        </a>
+                    </div>
+
+                    <div class="algorithm-item">
+                        <a href="multilevel.html">
+                            <div class="algorithm-number" style="background: #14b8a6;">8</div>
+                            <div class="algorithm-name">Multilevel</div>
+                            <div class="algorithm-desc">Queue Scheduling</div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Center Circle -->
+                <div class="compass-center">
+                    <div class="compass-center-content">
+                        <div class="text-3xl font-bold text-gray-800 mb-1">CPU</div>
+                        <div class="text-sm text-gray-600">Scheduling</div>
+                        <div class="text-xs text-gray-500 mt-1">Select Algorithm</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="text-center mt-12 text-white/80">
+            <p class="text-sm">Click on any algorithm around the compass to begin</p>
+        </footer>
+    </div>
+
+    <script>
+        // Floating Elements Animation
+        function createFloatingElement() {
+            const element = document.createElement('div');
+            element.classList.add('floating-element');
+            
+            // Randomly assign falling, rising, or spin-rising class (33% chance each)
+            const randomType = Math.random();
+            if (randomType < 0.33) {
+                element.classList.add('falling');
+            } else if (randomType < 0.66) {
+                element.classList.add('rising');
+            } else {
+                element.classList.add('spin-rising');
+            }
+            
+            // Array of tech/CPU-related strings
+            const textOptions = ['0101', 'P1', 'P2', 'P3', 'SJF', 'CPU', '⚡', 'FCFS', 'RR', 'SRTF', '10', '01', '⏱', '⚙', '▶', '◀', '⬆', '⬇'];
+            element.textContent = textOptions[Math.floor(Math.random() * textOptions.length)];
+            
+            // Array of cool blue-white colors
+            const colors = [
+                'rgba(74, 158, 255, 0.6)',
+                'rgba(255, 255, 255, 0.6)',
+                'rgba(34, 169, 253, 0.6)',
+                'rgba(96, 255, 138, 0.5)',
+                'rgba(255, 91, 255, 0.5)',
+                'rgba(255, 84, 84, 0.5)'
+            ];
+            element.style.color = colors[Math.floor(Math.random() * colors.length)];
+            
+            // Array of font sizes
+            const fontSizes = ['1.2rem', '1.5rem', '2rem', '2.5rem', '3rem'];
+            element.style.fontSize = fontSizes[Math.floor(Math.random() * fontSizes.length)];
+            
+            // Random horizontal position
+            element.style.left = Math.random() * 100 + 'vw';
+            
+            // Set CSS variables for animation
+            const duration = (Math.random() * 4 + 3).toFixed(1); // 3-7 seconds
+            const rotation = Math.random() * 360 - 180; // -180 to 180 degrees
+            const translateX = Math.random() * 100 - 50; // -50 to 50 pixels
+            
+            element.style.setProperty('--float-duration', duration + 's');
+            element.style.setProperty('--rotation', rotation + 'deg');
+            element.style.setProperty('--translate-x', translateX + 'px');
+            
+            // Append to body
+            document.body.appendChild(element);
+            
+            // Remove element after animation ends
+            element.addEventListener('animationend', () => {
+                element.remove();
+            });
+        }
+        
+        // Create floating elements at regular intervals
+        setInterval(createFloatingElement, 400);
+        
+        // Add click event listeners to all algorithm items
+        document.addEventListener('DOMContentLoaded', function() {
+            const algorithmItems = document.querySelectorAll('.algorithm-item');
+            const algorithmOrbit = document.querySelector('.algorithm-orbit');
+            
+            // Define the actual angles where each item is positioned (starting at 270° for FCFS)
+            const itemAngles = [270, 315, 0, 45, 90, 135, 180, 225];
+            
+            // Track current orbit rotation
+            let currentOrbitRotation = 0;
+            
+            algorithmItems.forEach((item, index) => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Get the target URL from the link
+                    const link = this.querySelector('a');
+                    const targetUrl = link.getAttribute('href');
+                    
+                    // If this is the first item (FCFS at top), navigate immediately without rotating
+                    if (index === 0) {
+                        window.location.href = targetUrl;
+                        return;
+                    }
+                    
+                    // Calculate rotation needed to bring this item to the top (270 degrees)
+                    const currentAngle = itemAngles[index];
+                    const targetAngle = 270; // Top position
+                    let rotationNeeded = targetAngle - currentAngle;
+                    
+                    // Normalize rotation to always go the shortest path
+                    if (rotationNeeded > 180) {
+                        rotationNeeded -= 360;
+                    } else if (rotationNeeded < -180) {
+                        rotationNeeded += 360;
+                    }
+                    
+                    // Update current orbit rotation
+                    currentOrbitRotation += rotationNeeded;
+                    
+                    // Rotate the entire orbit to bring clicked item to top
+                    algorithmOrbit.style.transform = `rotate(${currentOrbitRotation}deg)`;
+                    
+                    // Counter-rotate all items to keep them upright (relative to their CSS position)
+                    algorithmItems.forEach((otherItem, otherIndex) => {
+                        const baseAngle = itemAngles[otherIndex];
+                        otherItem.style.transform = `rotate(${baseAngle}deg) translate(280px) rotate(${-baseAngle - currentOrbitRotation}deg)`;
+                    });
+                    
+                    // Wait for rotation to complete, then navigate
+                    setTimeout(() => {
+                        window.location.href = targetUrl;
+                    }, 1200); // Wait for rotary phone-style rotation animation
+                });
+            });
+        });
+    </script>
+</body>
+</html>

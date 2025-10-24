@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SJF - CPU Scheduling Calculator</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts - Lora -->
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+    
+    <style>
+        @keyframes gradientBG {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        body {
+            font-family: 'Lora', serif;
+            background: linear-gradient(135deg,
+                #5479ff 0%,     
+                #22a9fd 25%,      
+                #130e95 50%,
+                #85b2ff 75%,
+                #0c72b1 100%); 
+            background-size: 400% 400%;
+            min-height: 100vh;
+            animation: gradientBG 15s ease infinite;
+        }
+
+        /* Floating Elements Animation */
+        .floating-element {
+            position: fixed;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0;
+            font-family: 'Lora', serif;
+            font-weight: 900;
+            text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        @keyframes fall-animation {
+            0% {
+                transform: translateY(0) translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(110vh) translateX(var(--translate-x)) rotate(var(--rotation));
+                opacity: 0;
+            }
+        }
+
+        @keyframes rise-animation {
+            0% {
+                transform: translateY(0) translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-110vh) translateX(var(--translate-x)) rotate(var(--rotation));
+                opacity: 0;
+            }
+        }
+
+        @keyframes spin-rise-animation {
+            0% {
+                transform: translateY(0) translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-110vh) translateX(var(--translate-x)) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .falling {
+            top: -50px;
+            animation: fall-animation var(--float-duration) linear forwards;
+        }
+
+        .rising {
+            bottom: -50px;
+            animation: rise-animation var(--float-duration) linear forwards;
+        }
+
+        .spin-rising {
+            bottom: -50px;
+            animation: spin-rise-animation var(--float-duration) linear forwards;
+        }
+    </style>
+</head>
+<body class="text-gray-900">
+    <div class="max-w-4xl mx-auto p-4 md:p-8">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <a href="index.html" class="inline-block mb-4 text-white hover:text-white/80 transition-colors">
+                <span class="text-2xl">←</span> Back to Home
+            </a>
+            <h1 class="text-4xl md:text-5xl font-bold text-white drop-shadow-lg mb-2">Shortest Job First (SJF)</h1>
+            <p class="text-white/90 text-lg">Non-preemptive scheduling based on burst time</p>
+        </header>
+
+        <!-- Error Message Area -->
+        <div id="errorMessage" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4">
+            <span id="errorText"></span>
+        </div>
+
+        <!-- Card 1: Process Inputs -->
+        <div class="bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-6 mb-6">
+            <h2 class="text-2xl font-bold mb-4">Process Inputs</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full mb-4" id="processTable">
+                    <thead>
+                        <tr class="border-b-2 border-gray-300">
+                            <th class="p-2 text-left">Process ID</th>
+                            <th class="p-2 text-left">Arrival Time (AT)</th>
+                            <th class="p-2 text-left">Burst Time (BT)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="processTableBody">
+                        <tr class="border-b border-gray-200">
+                            <td class="p-2"><input type="text" value="P1" class="process-id w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" /></td>
+                            <td class="p-2"><input type="number" min="0" value="0" class="arrival-time w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" /></td>
+                            <td class="p-2"><input type="number" min="1" value="5" class="burst-time w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" /></td>
+                        </tr>
+                        <tr class="border-b border-gray-200">
+                            <td class="p-2"><input type="text" value="P2" class="process-id w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" /></td>
+                            <td class="p-2"><input type="number" min="0" value="1" class="arrival-time w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" /></td>
+                            <td class="p-2"><input type="number" min="1" value="3" class="burst-time w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" /></td>
+                        </tr>
+                        <tr class="border-b border-gray-200">
+                            <td class="p-2"><input type="text" value="P3" class="process-id w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" /></td>
+                            <td class="p-2"><input type="number" min="0" value="2" class="arrival-time w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" /></td>
+                            <td class="p-2"><input type="number" min="1" value="8" class="burst-time w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" /></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="flex gap-3 flex-wrap">
+                <button id="addProcessBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-6 py-2 rounded-lg transition-colors">
+                    Add Process
+                </button>
+                <button id="removeProcessBtn" class="bg-red-500 hover:bg-red-600 text-white font-semibold px-6 py-2 rounded-lg transition-colors">
+                    Remove Last Process
+                </button>
+                <button id="calculateBtn" class="bg-green-500 hover:bg-green-600 text-white font-bold px-8 py-2 rounded-lg transition-colors shadow-md ml-auto">
+                    Calculate
+                </button>
+            </div>
+        </div>
+
+        <!-- Card 2: Results -->
+        <div id="resultsCard" class="bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-6 hidden">
+            <h2 class="text-2xl font-bold mb-4">Results</h2>
+            
+            <!-- Gantt Chart -->
+            <div class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">Gantt Chart</h3>
+                <div id="ganttChart" class="bg-gray-50 p-4 rounded-lg overflow-x-auto"></div>
+            </div>
+
+            <!-- Process Details Table -->
+            <div class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">Process Details</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full" id="resultsTable">
+                        <thead>
+                            <tr class="bg-gray-200 border-b-2 border-gray-300">
+                                <th class="p-2 text-left">Process ID</th>
+                                <th class="p-2 text-left">AT</th>
+                                <th class="p-2 text-left">BT</th>
+                                <th class="p-2 text-left">CT</th>
+                                <th class="p-2 text-left">TAT</th>
+                                <th class="p-2 text-left">WT</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Averages -->
+            <div class="bg-gray-50 p-4 rounded-lg">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-white p-4 rounded-lg shadow">
+                        <p class="text-sm text-gray-600 mb-1">Average Waiting Time:</p>
+                        <p class="text-2xl font-bold text-blue-600" id="avgWT">0.00</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow">
+                        <p class="text-sm text-gray-600 mb-1">Average Turnaround Time:</p>
+                        <p class="text-2xl font-bold text-green-600" id="avgTAT">0.00</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let processCount = 3;
+        const processTableBody = document.getElementById('processTableBody');
+        const addProcessBtn = document.getElementById('addProcessBtn');
+        const removeProcessBtn = document.getElementById('removeProcessBtn');
+        const calculateBtn = document.getElementById('calculateBtn');
+        const resultsCard = document.getElementById('resultsCard');
+        const errorMessage = document.getElementById('errorMessage');
+        const errorText = document.getElementById('errorText');
+
+        addProcessBtn.addEventListener('click', addProcess);
+        removeProcessBtn.addEventListener('click', removeProcess);
+        calculateBtn.addEventListener('click', calculate);
+
+        function addProcess() {
+            processCount++;
+            const row = document.createElement('tr');
+            row.className = 'border-b border-gray-200';
+            row.innerHTML = `
+                <td class="p-2"><input type="text" value="P${processCount}" class="process-id w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" /></td>
+                <td class="p-2"><input type="number" min="0" value="0" class="arrival-time w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" /></td>
+                <td class="p-2"><input type="number" min="1" value="1" class="burst-time w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" /></td>
+            `;
+            processTableBody.appendChild(row);
+        }
+
+        function removeProcess() {
+            if (processTableBody.children.length > 1) {
+                processTableBody.removeChild(processTableBody.lastChild);
+                processCount--;
+            } else {
+                showError('At least one process is required!');
+            }
+        }
+
+        function showError(message) {
+            errorText.textContent = message;
+            errorMessage.classList.remove('hidden');
+            setTimeout(() => errorMessage.classList.add('hidden'), 5000);
+        }
+
+        function hideError() {
+            errorMessage.classList.add('hidden');
+        }
+
+        function getProcessData() {
+            const rows = processTableBody.getElementsByTagName('tr');
+            const processes = [];
+            
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const pid = row.querySelector('.process-id').value.trim();
+                const at = parseFloat(row.querySelector('.arrival-time').value);
+                const bt = parseFloat(row.querySelector('.burst-time').value);
+
+                if (!pid) throw new Error('Process ID cannot be empty!');
+                if (isNaN(at) || at < 0) throw new Error(`Invalid Arrival Time for ${pid}!`);
+                if (isNaN(bt) || bt <= 0) throw new Error(`Invalid Burst Time for ${pid}!`);
+
+                processes.push({ pid, at, bt, ct: 0, tat: 0, wt: 0 });
+            }
+            return processes;
+        }
+
+        function calculate() {
+            hideError();
+            try {
+                const processes = getProcessData();
+                const { results, gantt } = calculateSJF(processes);
+                displayResults(results, gantt);
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        function calculateSJF(processes) {
+            const completed = [];
+            const pending = [...processes].map(p => ({ ...p }));
+            let currentTime = 0;
+            const gantt = [];
+
+            while (pending.length > 0) {
+                const available = pending.filter(p => p.at <= currentTime);
+                
+                if (available.length === 0) {
+                    currentTime = Math.min(...pending.map(p => p.at));
+                    continue;
+                }
+
+                available.sort((a, b) => a.bt - b.bt);
+                const process = available[0];
+                const index = pending.indexOf(process);
+                pending.splice(index, 1);
+
+                const start = currentTime;
+                currentTime += process.bt;
+
+                gantt.push({ pid: process.pid, start: start, end: currentTime });
+
+                completed.push({
+                    ...process,
+                    ct: currentTime,
+                    tat: currentTime - process.at,
+                    wt: currentTime - process.at - process.bt
+                });
+            }
+
+            return { results: completed, gantt };
+        }
+
+        function displayResults(results, gantt) {
+            const ganttChart = document.getElementById('ganttChart');
+            ganttChart.innerHTML = '';
+
+            const ganttContainer = document.createElement('div');
+            ganttContainer.className = 'flex flex-wrap gap-0';
+
+            const colors = ['bg-blue-400', 'bg-green-400', 'bg-yellow-400', 'bg-red-400', 'bg-purple-400', 'bg-pink-400', 'bg-indigo-400', 'bg-teal-400'];
+            const processColors = {};
+            let colorIndex = 0;
+
+            gantt.forEach(block => {
+                if (!processColors[block.pid]) {
+                    processColors[block.pid] = colors[colorIndex % colors.length];
+                    colorIndex++;
+                }
+
+                const blockDiv = document.createElement('div');
+                blockDiv.className = `${processColors[block.pid]} border border-gray-700 px-2 py-1 text-center min-w-[60px]`;
+                blockDiv.innerHTML = `
+                    <div class="text-xs font-semibold">${block.pid}</div>
+                    <div class="text-xs">${block.start}-${block.end}</div>
+                `;
+                ganttContainer.appendChild(blockDiv);
+            });
+
+            ganttChart.appendChild(ganttContainer);
+
+            const resultsTableBody = document.getElementById('resultsTableBody');
+            resultsTableBody.innerHTML = '';
+
+            results.forEach(process => {
+                const row = document.createElement('tr');
+                row.className = 'border-b border-gray-200';
+                row.innerHTML = `
+                    <td class="p-2">${process.pid}</td>
+                    <td class="p-2">${process.at}</td>
+                    <td class="p-2">${process.bt}</td>
+                    <td class="p-2">${process.ct}</td>
+                    <td class="p-2">${process.tat}</td>
+                    <td class="p-2">${process.wt}</td>
+                `;
+                resultsTableBody.appendChild(row);
+            });
+
+            const avgWT = results.reduce((sum, p) => sum + p.wt, 0) / results.length;
+            const avgTAT = results.reduce((sum, p) => sum + p.tat, 0) / results.length;
+
+            document.getElementById('avgWT').textContent = avgWT.toFixed(2);
+            document.getElementById('avgTAT').textContent = avgTAT.toFixed(2);
+
+            resultsCard.classList.remove('hidden');
+            resultsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Floating Elements Animation
+        function createFloatingElement() {
+            const element = document.createElement('div');
+            element.classList.add('floating-element');
+            
+            // Randomly assign falling, rising, or spin-rising class (33% chance each)
+            const randomType = Math.random();
+            if (randomType < 0.33) {
+                element.classList.add('falling');
+            } else if (randomType < 0.66) {
+                element.classList.add('rising');
+            } else {
+                element.classList.add('spin-rising');
+            }
+            
+            const textOptions = ['0101', 'P1', 'P2', 'P3', 'SJF', 'CPU', '⚡', 'FCFS', 'RR', 'SRTF', '10', '01', '⏱', '⚙', '▶', '◀', '⬆', '⬇'];
+            element.textContent = textOptions[Math.floor(Math.random() * textOptions.length)];
+            
+            const colors = [
+                'rgba(74, 158, 255, 0.6)',
+                'rgba(255, 255, 255, 0.6)',
+                'rgba(34, 169, 253, 0.6)',
+                'rgba(96, 255, 138, 0.5)',
+                'rgba(255, 91, 255, 0.5)',
+                'rgba(255, 84, 84, 0.5)'
+            ];
+            element.style.color = colors[Math.floor(Math.random() * colors.length)];
+            
+            const fontSizes = ['1.2rem', '1.5rem', '2rem', '2.5rem', '3rem'];
+            element.style.fontSize = fontSizes[Math.floor(Math.random() * fontSizes.length)];
+            
+            element.style.left = Math.random() * 100 + 'vw';
+            
+            const duration = (Math.random() * 4 + 3).toFixed(1);
+            const rotation = Math.random() * 360 - 180;
+            const translateX = Math.random() * 100 - 50;
+            
+            element.style.setProperty('--float-duration', duration + 's');
+            element.style.setProperty('--rotation', rotation + 'deg');
+            element.style.setProperty('--translate-x', translateX + 'px');
+            
+            document.body.appendChild(element);
+            
+            element.addEventListener('animationend', () => {
+                element.remove();
+            });
+        }
+        
+        setInterval(createFloatingElement, 400);
+    </script>
+</body>
+</html>
